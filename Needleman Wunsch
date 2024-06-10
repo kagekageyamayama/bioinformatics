@@ -1,2 +1,3 @@
 #code for needleman wunsch 
-import 
+import numpy as np
+
