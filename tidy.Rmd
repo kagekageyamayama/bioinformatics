@@ -1,0 +1,53 @@
+---
+---
+---
+
+# Using Tidy on R to work with data
+
+## ggplot2 first call in package from library
+
+```{r}
+library(tidyverse)
+#my_data<-read.csv('counts_data.csv')
+data('relig_income')
+relig_income
+typeof(relig_income)
+d1<-as.data.frame(relig_income)
+colnames(d1)
+```
+
+a very simple ggplot
+
+```{r}
+ggplot(data = d1,aes(x=religion)) +
+  geom_col(aes(y = d1[,'>150k'],fill = 'blue'))+
+  geom_col(aes(y=d1[,'<$10k'],fill= 'pink'))
+
+```
+
+Now using scatter plots
+
+```{r}
+data("iris")
+d2<-as.data.frame(iris)
+head(d2)
+#plot graph to check for relation between sepal.length and sepal.width
+ggplot(
+  data=d2,
+  aes(x=Sepal.Length,y=Sepal.Width)
+)+
+  geom_point(aes(colour=Species))+
+  geom_smooth(method='lm')
+```
+
+When aesthetic mappings are defined in ggplot(), at the global level, they’re passed down to each of the subsequent geom layers of the plot. However, each geom function in ggplot2 can also take a mapping argument, which allows for aesthetic mappings at the local level that are added to those inherited from the global level. Since we want points to be colored based on species but don’t want the lines to be separated out for them, we should specify color = species for geom_point() only.
+
+```{r}
+ggplot(
+  data=d2,
+  aes(x=Sepal.Length,y=Sepal.Width,colour=Species,shape = Species)
+)+
+  geom_point()+
+  geom_smooth(method='lm')+
+  labs(title = 'Relation of sepal length and width',x= 'length(in mm)',y="width(in mm)")
+```
