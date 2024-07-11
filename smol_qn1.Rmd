@@ -1,3 +1,4 @@
+#This is the code for using data from "1-s2.0-S088875432100121X-mmc1.xlsx" which contains expression levels of various hpv genes and "1-s2.0-S088875432100121X-mmc3.xlsx" which contains the breakpoint of the viral gene to determine the expression level when viral gene is integrated and when it is not
 ```{r}
 library(readxl)
 library(dplyr)
@@ -24,7 +25,7 @@ d2<-read_xlsx("1-s2.0-S088875432100121X-mmc3.xlsx")
 ```
 
 ```{r}
-#trying to do it together
+#mapping the genes to the breakpoint in d2
 d2[ , 'viral gene bp'] = NA
 for (i in range(1:2135)){
   if (d2[i,7]=='HPV16'){
@@ -43,14 +44,14 @@ for (i in range(1:2135)){
 ```
 
 ```{r}
-#since hpv16,18 and 45 are most abundant, we use those only for analysis
+#since hpv16,18 are most abundant, we use those only for analysis
 d2_16<-filter(d2,`HPV type`=='HPV16')
 d2_18<-filter(d2,`HPV type`=='HPV18')
-#d2_45<-filter(d2,`HPV type`=='HPV45')
 ```
 
 ```{r}
-#forming different data sets with
+#forming different data sets with so that unique can be applied
+#unique needs to be applied because one sample can have multiple breakpoints
 d2_16_new<-select(d2_16,c(2,21))
 d2_18_new<-select(d2_18,c(2,21))
 ```
@@ -121,29 +122,6 @@ ggplot(d1_16,aes(x=E1,y=E1_log2,fill = E1))+
 ggplot(d1_16,aes(x=E2,y=E2_log2,fill = E2))+
   geom_violin()
 ```
-
-```{r}
-ggplot(d1_16,aes(x=E7,y=E7_log2,fill = E7))+
-  geom_boxplot()
-ggplot(d1_16,aes(x=E6,y=E6_log2,fill = E6))+
-  geom_boxplot()
-ggplot(d1_16,aes(x=E1,y=E1_log2,fill = E1))+
-  geom_boxplot()
-ggplot(d1_16,aes(x=E2,y=E2_log2,fill = E2))+
-  geom_boxplot()
-```
-
-```{r}
-ggplot(d1_16,aes(x=E7,y=E7_log2,fill = E7))+
-  geom_violin()
-ggplot(d1_16,aes(x=E6,y=E6_log2,fill = E6))+
-  geom_violin()
-ggplot(d1_16,aes(x=E1,y=E1_log2,fill = E1))+
-  geom_violin()
-ggplot(d1_16,aes(x=E2,y=E2_log2,fill = E2))+
-  geom_violin()
-```
-
 ```{r}
 #hpv 18
 ggplot(d1_18,aes(x=E7,y=E7_log2,fill = E7))+
@@ -155,7 +133,6 @@ ggplot(d1_18,aes(x=E1,y=E1_log2,fill = E1))+
 ggplot(d1_18,aes(x=E2,y=E2_log2,fill = E2))+
   geom_boxplot()
 ```
-
 ```{r}
 ggplot(d1_18,aes(x=E7,y=E7_log2,fill = E7))+
   geom_violin()
