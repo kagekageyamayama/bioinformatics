@@ -1,0 +1,169 @@
+```{r}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+setwd("C:/Users/AMANKANTI/Desktop/coding n shi/smol_qn")
+```
+
+```{r}
+d1<-read_xlsx("1-s2.0-S088875432100121X-mmc1.xlsx")
+d1_16<-filter(d1,`HPV type`=='HPV16')
+d1_18<-filter(d1,`HPV type`=='HPV18')
+```
+
+```{r}
+hpv_16_read<-read.delim('HPV16REF (1).gff',skip = 2)
+gene_position16<-filter(hpv_16_read,region=='gene')
+
+hpv_18_read<-read.delim("HPV18REF.gff",skip=2)
+gene_position18<-filter(hpv_18_read,region=='gene')
+```
+
+```{r}
+d2<-read_xlsx("1-s2.0-S088875432100121X-mmc3.xlsx")
+```
+
+```{r}
+#trying to do it together
+d2[ , 'viral gene bp'] = NA
+for (i in range(1:2135)){
+  if (d2[i,7]=='HPV16'){
+    d2$`viral gene bp`[d2$`HPV breakpoint`<559 & d2$`HPV breakpoint`>104] <- 'E6'
+    d2$`viral gene bp`[d2$`HPV breakpoint`<858 & d2$`HPV breakpoint`>562] <- 'E7'
+    d2$`viral gene bp`[d2$`HPV breakpoint`<2814 & d2$`HPV breakpoint`>865] <- 'E1'
+    d2$`viral gene bp`[d2$`HPV breakpoint`<3853 & d2$`HPV breakpoint`>2756] <- 'E2'
+  }
+  if(d2[i,7]=='HPV18'){
+    d2$`viral gene bp`[d2$`HPV breakpoint`<581 & d2$`HPV breakpoint`>105] <- 'E6'
+    d2$`viral gene bp`[d2$`HPV breakpoint`<858 & d2$`HPV breakpoint`>590] <- 'E7'
+    d2$`viral gene bp`[d2$`HPV breakpoint`<2887 & d2$`HPV breakpoint`>914] <- 'E1'
+    d2$`viral gene bp`[d2$`HPV breakpoint`<3914 & d2$`HPV breakpoint`>2817] <- 'E2'
+  }
+}
+```
+
+```{r}
+#since hpv16,18 and 45 are most abundant, we use those only for analysis
+d2_16<-filter(d2,`HPV type`=='HPV16')
+d2_18<-filter(d2,`HPV type`=='HPV18')
+#d2_45<-filter(d2,`HPV type`=='HPV45')
+```
+
+```{r}
+#forming different data sets with
+d2_16_new<-select(d2_16,c(2,21))
+d2_18_new<-select(d2_18,c(2,21))
+```
+
+```{r}
+#final table
+for (i in c('E7','E6','E1','E2')){
+  d2_16_a<-filter(d2_16_new,`viral gene bp`==i)
+  d2_16_a<-unique(d2_16_a)
+  colnames(d2_16_a)[2]<-i
+  d1_16<-full_join(d1_16,d2_16_a,by='Sample id')
+}
+for (i in c('E7','E6','E1','E2')){
+  d2_18_a<-filter(d2_18_new,`viral gene bp`==i)
+  d2_18_a<-unique(d2_18_a)
+  colnames(d2_18_a)[2]<-i
+  d1_18<-left_join(d1_18,d2_18_a,by='Sample id')
+}
+```
+
+```{r}
+#further beautification
+d1_16<-select(d1_16,c(1:3,11:23))
+d1_18<-select(d1_18,c(1:3,11:23))
+#replacing na with yes and no
+#replace_na or <- works on a VECTOR ie all the values are of same type, so when you apply it to the entire data frame, the columns in which are numerical won't take na value as a string and vice versa
+#col_names1<-colnames(d1_16)
+#for (i in col_names1){
+  #if (typeof(d1_16$i)=="character"){
+    #print(i)
+  #}
+#}
+#the above method did not work since i here is of the form 'colname' but when we apply $, we dont need the quotes
+for (i in c(13,14,15,16)){
+  d1_16[i]<-replace(d1_16[i],is.na(d1_16[i]),'no')
+  d1_16[i]<-replace(d1_16[i],d1_16[i]==colnames(d1_16[i]),'yes')
+}
+    #geom_boxplot()
+
+for (i in c(13,14,15,16)){
+  d1_18[i]<-replace(d1_18[i],is.na(d1_18[i]),'no')
+  d1_18[i]<-replace(d1_18[i],d1_18[i]==colnames(d1_18[i]),'yes')
+}
+
+
+```
+
+```{r}
+#now we plot
+#hpv16
+ggplot(d1_16,aes(x=E7,y=E7_log2,fill = E7))+
+  geom_boxplot()
+ggplot(d1_16,aes(x=E6,y=E6_log2,fill = E6))+
+  geom_boxplot()
+ggplot(d1_16,aes(x=E1,y=E1_log2,fill = E1))+
+  geom_boxplot()
+ggplot(d1_16,aes(x=E2,y=E2_log2,fill = E2))+
+  geom_boxplot()
+```
+
+```{r}
+ggplot(d1_16,aes(x=E7,y=E7_log2,fill = E7))+
+  geom_violin()
+ggplot(d1_16,aes(x=E6,y=E6_log2,fill = E6))+
+  geom_violin()
+ggplot(d1_16,aes(x=E1,y=E1_log2,fill = E1))+
+  geom_violin()
+ggplot(d1_16,aes(x=E2,y=E2_log2,fill = E2))+
+  geom_violin()
+```
+
+```{r}
+ggplot(d1_16,aes(x=E7,y=E7_log2,fill = E7))+
+  geom_boxplot()
+ggplot(d1_16,aes(x=E6,y=E6_log2,fill = E6))+
+  geom_boxplot()
+ggplot(d1_16,aes(x=E1,y=E1_log2,fill = E1))+
+  geom_boxplot()
+ggplot(d1_16,aes(x=E2,y=E2_log2,fill = E2))+
+  geom_boxplot()
+```
+
+```{r}
+ggplot(d1_16,aes(x=E7,y=E7_log2,fill = E7))+
+  geom_violin()
+ggplot(d1_16,aes(x=E6,y=E6_log2,fill = E6))+
+  geom_violin()
+ggplot(d1_16,aes(x=E1,y=E1_log2,fill = E1))+
+  geom_violin()
+ggplot(d1_16,aes(x=E2,y=E2_log2,fill = E2))+
+  geom_violin()
+```
+
+```{r}
+#hpv 18
+ggplot(d1_18,aes(x=E7,y=E7_log2,fill = E7))+
+  geom_boxplot()
+ggplot(d1_18,aes(x=E6,y=E6_log2,fill = E6))+
+  geom_boxplot()
+ggplot(d1_18,aes(x=E1,y=E1_log2,fill = E1))+
+  geom_boxplot()
+ggplot(d1_18,aes(x=E2,y=E2_log2,fill = E2))+
+  geom_boxplot()
+```
+
+```{r}
+ggplot(d1_18,aes(x=E7,y=E7_log2,fill = E7))+
+  geom_violin()
+ggplot(d1_18,aes(x=E6,y=E6_log2,fill = E6))+
+  geom_violin()
+ggplot(d1_18,aes(x=E1,y=E1_log2,fill = E1))+
+  geom_violin()
+ggplot(d1_18,aes(x=E2,y=E2_log2,fill = E2))+
+  geom_violin()
+```
+
